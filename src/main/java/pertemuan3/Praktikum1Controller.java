@@ -6,12 +6,12 @@ package pertemuan3;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -49,25 +49,22 @@ public class Praktikum1Controller {
         JFileChooser loadFile = view.getjFileChooser1();
         StyledDocument doc = view.getTxtPane().getStyledDocument();
         if (JFileChooser.APPROVE_OPTION == loadFile.showOpenDialog(view)) {
-            InputStream inputStream = null;
+            BufferedReader reader = null;
             try {
-                inputStream = new FileInputStream(loadFile.getSelectedFile());
-                int read = inputStream.read();
+                reader = new BufferedReader(new FileReader(loadFile.getSelectedFile()));
+                String data = null;
                 doc.insertString(0, "", null);
-                while (read != -1) {
-                    list.add(read);// tambahkan 1 baris
-                    doc.insertString(doc.getLength(), "" + read, null);
-                    System.out.println("" + read);
-                    read = inputStream.read();
+                while ((data = reader.readLine()) != null) {
+                    doc.insertString(doc.getLength(), data, null);
                 }
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Praktikum1Controller.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException | BadLocationException ex) {
                 Logger.getLogger(Praktikum1Controller.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
-                if (inputStream != null) {
+                if (reader != null) {
                     try {
-                        inputStream.close();
+                        reader.close();
                     } catch (IOException ex) {
                         Logger.getLogger(Praktikum1Controller.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -79,15 +76,12 @@ public class Praktikum1Controller {
     private void save() {
         JFileChooser loadFile = view.getjFileChooser1();
         if (JFileChooser.APPROVE_OPTION == loadFile.showSaveDialog(view)) {
-            OutputStream os = null;
+            BufferedWriter writer = null;
             try {
-                if (!list.isEmpty()) {
-                    os = new FileOutputStream(loadFile.getSelectedFile());
-                    byte[] dt = new byte[list.size()];
-                    for (int i = 0; i < list.size(); i++) {
-                        dt[i] = list.get(i).byteValue();
-                    }
-                    os.write(dt);
+                String contents = view.getTxtPane().getText();
+                if (contents != null && !contents.isEmpty()) {
+                    writer = new BufferedWriter(new FileWriter(loadFile.getSelectedFile()));
+                    writer.write(contents);
                 }
 
             } catch (FileNotFoundException ex) {
@@ -95,11 +89,11 @@ public class Praktikum1Controller {
             } catch (IOException ex) {
                 Logger.getLogger(Praktikum1Controller.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
-                if (os != null) {
+                if (writer != null) {
                     try {
-                        os.flush();
-                        os.close();
-                        list.clear();
+                        writer.flush();
+                        writer.close();
+                        view.getTxtPane().setText("");
                     } catch (IOException ex) {
                         Logger.getLogger(Praktikum1Controller.class.getName()).log(Level.SEVERE, null, ex);
                     }
